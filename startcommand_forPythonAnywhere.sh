@@ -1,0 +1,11 @@
+# PythonAnywhereヘルパーツールのインストール
+pip3.6 install --user pythonanywhere
+
+# GiyHubのソースからWebサービスを起動
+pa_autoconfigure_django.py --python=3.6 https://github.com/okmethod/mydjango.git
+# GitHubからコードをダウンロード
+# PythonAnywhere上に仮想環境を作成
+# 一部のデプロイメント設定で設定ファイルを更新
+# manage.py migrateコマンドを使ってPythonAnywhere上のデータベースをセットアップ
+# 静的ファイルの設定
+# APIを通じてPythonAnywhereがWebサービスを提供するように設定
