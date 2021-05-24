@@ -1,7 +1,10 @@
+# 仮想環境の有効化
+workon okmethod.pythonanywhere.com
+
 # PythonAnywhereヘルパーツールのインストール
 pip3.6 install --user pythonanywhere
 
-# GiyHubのソースからWebサービスを起動
+# GitHubのソースからWebサービスを起動
 pa_autoconfigure_django.py --python=3.6 https://github.com/okmethod/mydjango.git
 # GitHubからコードをダウンロード
 # PythonAnywhere上に仮想環境を作成
@@ -9,3 +12,8 @@ pa_autoconfigure_django.py --python=3.6 https://github.com/okmethod/mydjango.git
 # manage.py migrateコマンドを使ってPythonAnywhere上のデータベースをセットアップ
 # 静的ファイルの設定
 # APIを通じてPythonAnywhereがWebサービスを提供するように設定
+
+# GitHubのソースをpullし、staticファイルを再読み込み
+cd ~/okmethod.pythonanywhere.com
+git pull
+python manage.py collectstatic
