@@ -15,27 +15,28 @@ Djangoを使用して、pythonでWebサービスを実装する。
     ├── requirements.txt
     ├── db.sqlite3
     │
-    ├── mysite
+    ├── config
     │   ├── __init__.py
     │   ├── settings.py
     │   ├── urls.py
     │   └── wsgi.py
     │
-    └── <project>
-        ├── __init__.py
-        ├── admin.py
-        ├── models.py
-        ├── urls.py
-        ├── views.py
-        ├── forms.py
-        ├── apps.py
-        ├── tests.py
-        │
-        ├── templates
-        │   └── <project>
-        │       └── *.html
-        └── static
-            ├── css
-            │   └── *.css
-            └── image
-
+    ├── <apps>
+    │   ├── __init__.py
+    │   ├── admin.py
+    │   ├── models.py
+    │   ├── urls.py
+    │   ├── views.py
+    │   ├── forms.py
+    │   ├── apps.py
+    │   └── tests.py
+    │
+    ├── staticfiles
+    │   ├── css
+    │   │   └── *.css
+    │   └── image
+    │       └── *
+    │      
+    └── templates
+        └── <apps>
+            └── *.html
