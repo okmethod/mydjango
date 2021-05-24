@@ -7,8 +7,10 @@
                 <p>published: {{ post.published_date }}</p>
             </div>
             <h2><a href="{% url 'post_detail' pk=post.pk %}">{{ post.title }}</a></h2>
+            <p>（作成者：{{ post.author }}）</p>
             <p>{{ post.text|linebreaksbr }}</p>
             <a href="{% url 'post_detail' pk=post.pk %}">コメント: {{ post.allowed_comments.count }} 件 </a>
         </div>
+        <hr>
     {% endfor %}
 {% endblock %}

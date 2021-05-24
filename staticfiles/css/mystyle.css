@@ -1,7 +1,15 @@
+h1, h2, h3, h4 {
+    font-family: system-ui;
+}
+
 .page-header {
     background-color: #0051C2;
     margin-top: 0;
     padding: 20px 20px 20px 40px;
+    position: sticky;
+    top: 0;
+    justify-content: space-between;
+    width: 100%;
 }
 
 .page-header h1, .page-header h1 a, .page-header h1 a:visited, .page-header h1 a:active {
@@ -12,10 +20,6 @@
 
 .content {
     margin-left: 40px;
-}
-
-h1, h2, h3, h4 {
-    font-family: system-ui;
 }
 
 .date {
