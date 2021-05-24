@@ -1,4 +1,4 @@
-{% extends 'blog/base.html' %}
+{% extends 'bbs/base.html' %}
 
 {% block content %}
     {% for post in posts %}
@@ -8,6 +8,6 @@
             <p>{{ post.text|truncatechars:200 }}</p>
         </div>
     {% empty %}
-        <p>No drafts here yet.</p>
+        <p>There are no drafts.</p>
     {% endfor %}
 {% endblock %}

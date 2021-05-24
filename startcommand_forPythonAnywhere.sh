@@ -1,6 +1,3 @@
-# 仮想環境の有効化
-workon okmethod.pythonanywhere.com
-
 # PythonAnywhereヘルパーツールのインストール
 pip3.6 install --user pythonanywhere
 
@@ -13,9 +10,15 @@ pa_autoconfigure_django.py --python=3.6 https://github.com/okmethod/mydjango.git
 # 静的ファイルの設定
 # APIを通じてPythonAnywhereがWebサービスを提供するように設定
 
+# superユーザの作成
+python manage.py createsuperuser
+
+# 仮想環境の有効化
+workon okmethod.pythonanywhere.com
+
 # GitHubのソースをpull
 cd ~/okmethod.pythonanywhere.com
-git reset --hard HEAD~1
+git reset --hard HEAD
 git pull
 
 # DEBUGモードをOFFに切り替え
