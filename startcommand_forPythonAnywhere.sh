@@ -13,7 +13,13 @@ pa_autoconfigure_django.py --python=3.6 https://github.com/okmethod/mydjango.git
 # 静的ファイルの設定
 # APIを通じてPythonAnywhereがWebサービスを提供するように設定
 
-# GitHubのソースをpullし、staticファイルを再読み込み
+# GitHubのソースをpull
 cd ~/okmethod.pythonanywhere.com
+git reset --hard HEAD~1
 git pull
+
+# DEBUGモードをOFFに切り替え
+python switch_debug_mode.py off
+
+# staticファイルを再読み込み
 python manage.py collectstatic
