@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'app_top_page.apps.TopPageConfig',
     'app_bbs.apps.BbsConfig',
+    'app_reversi.apps.ReversiConfig',
 ]
 
 MIDDLEWARE = [
