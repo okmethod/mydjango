@@ -1,0 +1,31 @@
+{% load static %}
+<!DOCTYPE html>
+<meta http-equiv="content-type" charset="utf-8">
+<html>
+  <head>
+    <title>Reversi Game</title>
+    <style type="text/css">
+      #canv {
+        border: 1px solid black;
+        width: 500px;
+        height: 500px;
+        background-color: green;
+        text-align: center;
+        vertical-align: middle;
+        table-layout: fixed;
+        padding: 1px 1px 1px 1px;
+        font-size: 33px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <canvas id="canv" width="500px" height="500px"></canvas>
+    <script type="text/javascript" src="{% static 'js/reversi_gameboard_render.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/reversi_gameboard_event_receipter.js' %}"></script>
+    <script>
+      var ctx = document.getElementById("canv").getContext('2d');
+      Game.initGame(ctx);
+    </script>
+  </body>
+</html>
