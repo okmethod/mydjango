@@ -1,0 +1,54 @@
+{% extends 'reversi/base.html' %}
+
+{% block content %}
+{% load static %}
+<!DOCTYPE html>
+    <p>プレイヤー1：{{ game.get_player1.name }} {{ game.get_player1.points }}点</p>
+    <p>プレイヤー2：{{ game.get_player2.name }} {{ game.get_player2.points }}点</p>
+    <canvas id="canv" width="500px" height="500px"></canvas>
+    <script type="text/javascript" src="{% static 'js/reversi_gameboard_render.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/reversi_gameboard_event_receipter.js' %}"></script>
+    <script>
+        var ctx = document.getElementById("canv").getContext('2d');
+        Game.initGame(ctx);
+    </script>
+    <br>
+    <button id="get_btn" type="button">GetUserList</button>
+    <div id="get_userlist"></div>
+    <div id="get_result"></div>
+    <script>
+        const url = "http://127.0.0.1:8000/reversi/api/players";
+        const userList  = document.getElementById("get_userlist");
+        const getResult = document.getElementById("get_result");
+
+        document.getElementById("get_btn")
+            .addEventListener("click", () => {
+                userList.textContent = "";
+                getResult.textContent = "";
+                const init = {method: "GET"};
+
+                fetch(url, init)
+                .then(response => {
+                    if (response.ok){
+                        return response.json();
+                    } else {
+                        throw Error();
+                    }
+                })
+                .then(data => {
+                    getResult.textContent = "成功しました";
+                    console.log(data);
+                    for(const player of data){
+                        console.log(player);
+                        const div = document.createElement('div');
+                        div.textContent = player.name;
+                        userList.appendChild(div);
+                    }
+                })
+                .catch(error => {
+                    getResult.textContent = "失敗しました";
+                    console.log(error);
+                })
+            })
+    </script>
+{% endblock %}

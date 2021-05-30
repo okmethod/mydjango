@@ -1,4 +1,22 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from django.utils import timezone
+from rest_framework import viewsets, filters
+from rest_framework.views import APIView
+from rest_framework.response import Response
 
-def reversi(request):
-    return render(request, 'reversi/reversi_gameboard.html')
+from .models import GameModel, GamePlayer, GameBoard, GameRecord
+from .forms import GamePlayerForm
+from .serializer import GamePlayerSerializer
+
+def home(request):
+    games = GameModel.objects.filter(created_date__lte=timezone.now()).order_by('created_date')
+    return render(request, 'reversi/game_list.html', {'games': games})
+
+def game(request, pk):
+    game = get_object_or_404(GameModel, pk=pk)
+    return render(request, 'reversi/game_detail.html', {'game': game})
+
+class GamePlayerViewSet(viewsets.ModelViewSet):
+    queryset = GamePlayer.objects.all()
+    serializer_class = GamePlayerSerializer

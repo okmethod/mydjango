@@ -1,0 +1,19 @@
+{% extends 'reversi/base.html' %}
+
+{% block content %}
+    {% for game in games %}
+        <div class="game">
+            <div class="date">
+                <p>created: {{ game.created_date }}</p>
+            </div>
+            <h2><a href="{% url 'reversi_game' pk=game.pk %}">{{ game.title }}</a></h2>
+            <p>プレイヤー：{{ game.get_player1.name }} vs {{ game.get_player2.name }}</p>
+            {% if game.is_game_end %}
+                <p>ステータス：ゲーム終了</p>
+            {% else %}
+                <p>ステータス：ゲーム中</p>
+            {% endif %}
+        </div>
+        <hr>
+    {% endfor %}
+{% endblock %}

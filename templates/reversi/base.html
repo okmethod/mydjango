@@ -1,0 +1,23 @@
+{% load static %}
+<html>
+    <head>
+        <title>OK Website リバーシ</title>
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+        <link rel="stylesheet" href="{% static 'css/mystyle.css' %}">
+        <link rel="stylesheet" href="{% static 'css/reversi.css' %}">
+    </head>
+    <body>
+        <header class="page-header">
+            <a href="/">TopPage</a>
+            <br>
+            <h1><a href="/bbs">OK Website リバーシ</a></h1>
+        </header>
+        <div class="content container">
+            <div class="row">
+            {% block content %}
+            {% endblock %}
+            </div>
+        </div>
+    </body>
+</html>
