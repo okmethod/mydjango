@@ -6,8 +6,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 
 from .models import GameModel, GamePlayer, GameBoard, GameRecord
-from .forms import GamePlayerForm
-from .serializer import GamePlayerSerializer
+from .serializer import GamePlayerSerializer, GameBoardSerializer
 
 def home(request):
     games = GameModel.objects.filter(created_date__lte=timezone.now()).order_by('created_date')
@@ -20,3 +19,9 @@ def game(request, pk):
 class GamePlayerViewSet(viewsets.ModelViewSet):
     queryset = GamePlayer.objects.all()
     serializer_class = GamePlayerSerializer
+    filter_fields = ('game',)
+
+class GameBoardViewSet(viewsets.ModelViewSet):
+    queryset = GameBoard.objects.all()
+    serializer_class = GameBoardSerializer
+    filter_fields = ('game',)

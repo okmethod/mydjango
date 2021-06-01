@@ -20,15 +20,15 @@
         y: 0
     }
     var init_state = {
-        map: [0, 0, 0, 0, 0, 0, 0, 0,
-              0, 0, 0, 0, 0, 0, 0, 0,
-              0, 0, 0, 0, 0, 0, 0, 0,
-              0, 0, 0, -1, 1, 0, 0, 0,
-              0, 0, 0, 1, -1, 0, 0, 0,
-              0, 0, 0, 0, 0, 0, 0, 0,
-              0, 0, 0, 0, 0, 0, 0, 0,
-              0, 0, 0, 0, 0, 0, 0, 0,
-             ],
+      map: ["0", "0", "0", "0", "0", "0", "0", "0",
+            "0", "0", "0", "0", "0", "0", "0", "0",
+            "0", "0", "0", "0", "0", "0", "0", "0",
+            "0", "0", "0", "1", "2", "0", "0", "0",
+            "0", "0", "0", "0", "1", "0", "0", "0",
+            "0", "0", "0", "0", "2", "0", "0", "0",
+            "0", "0", "0", "0", "0", "0", "0", "0",
+            "0", "0", "0", "0", "0", "0", "0", "0",
+           ],
         mode: 0,
         turn: 1,
         revision: 0,
@@ -47,6 +47,7 @@
             evented = true;
             setEvents();
         }
+
         Render.render(ctx, state, point);
     }
 
@@ -77,8 +78,15 @@
     function ev_mouseClick(e) {
         var selected = hitTest(point.x, point.y);
         var number;
+        update_state()
+        console.log(global.document)
+
         if (selected.name === "RECT_BOARD") {
             number = selected.value;
+            update_state()
+            //console.log(state.map)
+            Render.render(ctx, state, point);
+            /*
             if (Ai.canPut(state.map, selected.value, state.turn) === true) {
                 state.map = Ai.putMap(state.map, selected.value, state.turn);
                 state.turn = -1 * state.turn;
@@ -92,8 +100,8 @@
                     state.revision += 1;
                     Render.render(ctx, state, point);
                 }, 100);
-
             }
+            */
         }
     }
 
@@ -140,5 +148,21 @@
     function objCopy(obj) {
         return JSON.parse(JSON.stringify(obj));
     }
+
+    // ajaxによるAPIアクセス
+    function update_state(){
+        const player_apiurl = "http://127.0.0.1:8000/reversi/api/board/?game=1";
+        $.ajax({
+            url: player_apiurl,
+            method: "GET",
+            data: {"status":0},　// ユーザーのステータス情報を変更しないように
+            success: function(data){
+                //console.log(data[0])
+                state.map = objCopy(data[0]).state.split('');
+            }, error: function(error){
+                console.log(error)
+            }
+        })
+    };
 
 })((this || 0).self || global);

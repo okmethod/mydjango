@@ -5,6 +5,7 @@ from . import views
 
 router = routers.DefaultRouter()
 router.register('players', views.GamePlayerViewSet)
+router.register('board', views.GameBoardViewSet)
 
 urlpatterns = [
     path('', views.home, name='reversi_home'),

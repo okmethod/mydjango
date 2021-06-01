@@ -49,6 +49,7 @@
             if (state.revision != prev_revision) { // 盤面が変化している場合のみ
                 canv_cache.canv_pieaces = drawPieceALL(state);
             }
+            canv_cache.canv_pieaces = drawPieceALL(state);
             canv_cache.canv_effect = drawEffect(state, point);
         }
 
@@ -106,7 +107,7 @@
         // すべてのマスをループ
         for (var x = 0; x < COL; x++) {
             for (var y = 0; y < COL; y++) {
-                if (state.map[y * COL + x] != 0) {
+                if (state.map[y * COL + x] != "0") {
                     // 石を1つを描画
                     drawPiece(ctx, x * CELL_SIZE, y * CELL_SIZE, state.map[y * COL + x]);
                 }
@@ -121,10 +122,10 @@
     function drawPiece(ctx, x, y, number) {
 
         // 石色の設定
-        if (number > 0) { // 白石の設定
-            ctx.fillStyle = COLOR_WHITE;
-        } else if (number < 0) { // 黒石の設定
+        if (number == "1") { // 黒石の設定
             ctx.fillStyle = COLOR_BLACK;
+        } else if (number == "2") { // 白石の設定
+            ctx.fillStyle = COLOR_WHITE;
         }
 
         // 影の設定
