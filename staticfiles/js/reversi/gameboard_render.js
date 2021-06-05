@@ -6,25 +6,19 @@
 
     // Header -----------------------------------------------
     global.Render = Render;
+    global.Render.init   = init;
     global.Render.render = render;
-    global.Render.RECT_BOARD = RECT_BOARD;
-    global.Render.CELL_SIZE = CELL_SIZE;
 
     // Const ------------------------------------------------
-    var COL = 8;
-    var RECT_CANV = {
-        x: 0, y: 0, w: 500, h: 500
-    };
-    var RECT_BOARD = {
-        x: 0, y: 0, w: 500, h: 500
-    };
-    var CELL_SIZE = RECT_CANV.w / COL | 0;
+    var BOARD_SIZE;
+    var RECT_CANV;
+    var CELL_SIZE;
 
-    var COLOR_BOARD  = "#00A000";
-    var COLOR_LINE   = "#006400";
-    var COLOR_WHITE  = "#FFFFFF";
-    var COLOR_BLACK  = "#000000";
-    var COLOR_SELECT = "#FFFFFF";
+    var COLOR_PLAYER1  = "#000000";
+    var COLOR_PLAYER2  = "#FFFFFF";
+    const COLOR_BOARD  = "#00A000";
+    const COLOR_LINE   = "#006400";
+    const COLOR_SELECT = "#FFFFFF";
 
     // Variable ---------------------------------------------
     var state_cache = null;
@@ -36,6 +30,15 @@
     };
 
     // Function ---------------------------------------------
+    // 初期化
+    function init(board_size, rect_board, p1_color, p2_color) {
+        BOARD_SIZE = board_size;
+        RECT_CANV  = rect_board;
+        CELL_SIZE  = RECT_CANV.w / BOARD_SIZE | 0;
+        COLOR_PLAYER1 = rgb2hex(p1_color);
+        COLOR_PLAYER2 = rgb2hex(p2_color);
+    }
+
     // ゲーム画面全体を描画する
     function render(ctx, state, point) {
         // 描画対象物を生成してキャッシュに保持
@@ -43,7 +46,6 @@
             canv_cache.canv_board = drawBoard(state);
             canv_cache.canv_pieaces = drawPieceALL(state);
             canv_cache.canv_effect = drawEffect(state);
-            Render.RECT_BOARD = RECT_BOARD;
             Render.CELL_SIZE = CELL_SIZE;
         } else { // 初期状態でない場合、必要箇所のみ描画
             if (state.revision != prev_revision) { // 盤面が変化している場合のみ
@@ -78,8 +80,8 @@
         ctx.fillStyle = COLOR_BOARD;
 
         // 罫線
-        for (var x = 0; x < COL; x++) {
-            for (var y = 0; y < COL; y++) {
+        for (var x = 0; x < BOARD_SIZE; x++) {
+            for (var y = 0; y < BOARD_SIZE; y++) {
                 ctx.strokeStyle = COLOR_LINE;
                 ctx.beginPath();
                 ctx.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
@@ -105,11 +107,11 @@
         ctx.clearRect(0, 0, RECT_CANV.w, RECT_CANV.h);
 
         // すべてのマスをループ
-        for (var x = 0; x < COL; x++) {
-            for (var y = 0; y < COL; y++) {
-                if (state.map[y * COL + x] != "0") {
+        for (var x = 0; x < BOARD_SIZE; x++) {
+            for (var y = 0; y < BOARD_SIZE; y++) {
+                if (state.map[y * BOARD_SIZE + x] != "0") {
                     // 石を1つを描画
-                    drawPiece(ctx, x * CELL_SIZE, y * CELL_SIZE, state.map[y * COL + x]);
+                    drawPiece(ctx, x * CELL_SIZE, y * CELL_SIZE, state.map[y * BOARD_SIZE + x]);
                 }
             }
         }
@@ -123,9 +125,9 @@
 
         // 石色の設定
         if (number == "1") { // 黒石の設定
-            ctx.fillStyle = COLOR_BLACK;
+            ctx.fillStyle = COLOR_PLAYER1;
         } else if (number == "2") { // 白石の設定
-            ctx.fillStyle = COLOR_WHITE;
+            ctx.fillStyle = COLOR_PLAYER2;
         }
 
         // 影の設定
@@ -158,8 +160,8 @@
         ctx.clearRect(0, 0, RECT_CANV.w, RECT_CANV.h);
 
         // カーソル位置を取得
-        var x = (state.selected.value % COL | 0);
-        var y = (state.selected.value / COL | 0);
+        var x = (state.selected.value % BOARD_SIZE | 0);
+        var y = (state.selected.value / BOARD_SIZE | 0);
 
         // カーソル
         ctx.fillStyle = COLOR_SELECT;
@@ -170,6 +172,13 @@
 
         // エフェクトキャッシュを返却
         return canv_cache.canv_effect;
+    }
+
+    // RGBをHEXに変換
+    function rgb2hex(rgb) {
+	     return "#" + rgb.map( function ( value ) {
+		       return ( "0" + value.toString( 16 ) ).slice( -2 ) ;
+	     } ).join( "" ) ;
     }
 
 })((this || 0).self || global);

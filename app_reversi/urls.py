@@ -4,8 +4,8 @@ from rest_framework import routers
 from . import views
 
 router = routers.DefaultRouter()
-router.register('players', views.GamePlayerViewSet)
-router.register('board', views.GameBoardViewSet)
+router.register('game',   views.GameModelViewSet)
+router.register('record', views.GameRecordViewSet)
 
 urlpatterns = [
     path('', views.home, name='reversi_home'),

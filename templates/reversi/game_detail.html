@@ -3,73 +3,77 @@
 {% block content %}
 {% load static %}
 <!DOCTYPE html>
-    <p>プレイヤー1：{{ game.get_player1.name }} {{ game.get_player1.points }}点</p>
-    <p>プレイヤー2：{{ game.get_player2.name }} {{ game.get_player2.points }}点</p>
+    <p>プレイヤー1：{{ game.get_player1.name }} </p>
+    <p>プレイヤー2：{{ game.get_player2.name }} </p>
     <canvas id="canv" width="500px" height="500px"></canvas>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script type="text/javascript" src="{% static 'js/reversi/api_controller.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/reversi/gameboard_render.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/reversi/gameboard_event_receipter.js' %}"></script>
     <script>
-        var ctx = document.getElementById("canv").getContext('2d');
-        Game.initGame(ctx);
+        // JavaScriptの初期設定
+        const canv = document.getElementById("canv")
+        var   ctx  = canv.getContext('2d');
+        const host_name  = "{{ request.get_host }}";
+        const game_pk    = {{ game.pk }};
+        const borad_size = {{ game.board.size }};
+        const p1_color_r = {{ game.get_player1.color_r }};
+        const p1_color_g = {{ game.get_player1.color_g }};
+        const p1_color_b = {{ game.get_player1.color_b }};
+        const p2_color_r = {{ game.get_player2.color_r }};
+        const p2_color_g = {{ game.get_player2.color_g }};
+        const p2_color_b = {{ game.get_player2.color_b }};
+        const p1_color   = [p1_color_r, p1_color_g, p1_color_b]
+        const p2_color   = [p2_color_r, p2_color_g, p2_color_b]
+        const rect_board = {x:0, y:0, w:canv.width, h:canv.height};
+        ApiController.init(host_name, game_pk);
+        Render.init(borad_size, rect_board, p1_color, p2_color);
+        EventReceipter.init(borad_size, rect_board, ctx);
     </script>
-    <br>
-    <button id="get_btn" type="button">GetPlayerList</button>
+
+    <hr>
+
     <!-- APIアクセスのサンプル -->
-    <div id="get_playerlist"></div>
+    <button id="get_btn" type="button">Get GameBoard</button>
+    <div id="get_test_div"></div>
     <script>
-        const url = "http://127.0.0.1:8000/reversi/api/players/?game="+{{ game.pk }};
-        const playerList = document.getElementById("get_playerlist");
-
-        document.getElementById("get_btn")
-            .addEventListener("click", () => {
-                playerList.textContent = "";
-                const init = {method: "GET"};
-
-                fetch(url, init)
-                .then(response => {
-                    if (response.ok){
-                        return response.json();
-                    } else {
-                        throw Error();
+        const n = {{ game.get_num_of_records }};
+        const get_test_div = document.getElementById("get_test_div");
+        document.getElementById("get_btn").addEventListener("click", () => {
+            ApiController.getGameState().then(result => {
+                console.log(result);
+                const gameboard_state = result.board.state
+                const num_of_records  = result.records.length
+                const state = {
+                  map: gameboard_state.split(''),
+                  revision: num_of_records,
+                    selected: {
+                        name: "",
+                        value: 0
                     }
-                })
-                .then(data => {console.log(data);
-                    for(const player of data){
-                        console.log(player);
-                        const div = document.createElement('div');
-                        div.textContent = player.name;
-                        playerList.appendChild(div);
-                    }
-                })
-                .catch(error => {
-                    console.log(error);
-                })
+                };
+                const point = {x:0,y:0}
+                Render.render(ctx, state, point);
+                get_test_div.textContent = gameboard_state;
             })
+        });
+
+    </script>
+
+    <hr>
+
+    <button id="post_btn" type="button">Post GameRecord</button>
+    <div id="post_test_div"></div>
+    <script>
+        const post_test_div = document.getElementById("post_test_div");
+        document.getElementById("post_btn").addEventListener("click", () => {
+            ApiController.postGameRecord(1, "set_piece_at_pos", [7,7]).then(result => {
+                console.log(result);
+                post_test_div.textContent = result;
+            })
+        });
+
     </script>
     <hr>
-    <!-- ajaxによるリアルタイムAPIアクセスのサンプル -->
-    <!--
-    <div id="ajax_test"></div>
-    <script>
-        function update(){
-            const this_ = document.getElementById("ajax_test");
-            const player_apiurl = "http://127.0.0.1:8000/reversi/api/board/?game="+{{ game.pk }};
-            $.ajax({
-                url: player_apiurl,
-                method: "GET",
-                data: {"status":0},　// ユーザーのステータス情報を変更しないように
-                success: function(data){
-                    console.log(data[0])
-                    this_.textContent = data[0].state
-                }, error: function(error){
-                    console.log(error)
-                }
-            })
-        };
-        $(function() {
-            setInterval("update()", 2*1000);
-        });
-    </script>
-    -->
+
 {% endblock %}

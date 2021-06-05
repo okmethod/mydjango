@@ -1,15 +1,31 @@
 from rest_framework import serializers
 
-from .models import GamePlayer, GameBoard
+from .models import GameModel, GamePlayer, GameBoard, GameRecord
 
 class GamePlayerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GamePlayer
-        fields = ('game', 'name', 'image', 'color_r', 'color_g', 'color_b',)
+        fields = ('name', 'image', 'color_r', 'color_g', 'color_b',)
 
 class GameBoardSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GameBoard
         fields = ('game', 'size', 'state',)
+
+class GameRecordSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = GameRecord
+        fields = ('game', 'player', 'action', 'pos_x', 'pos_y',)
+
+# ゲームの公開情報をまとめて取得する
+class GameModelSerializer(serializers.ModelSerializer):
+    players = GamePlayerSerializer(many=True)
+    board   = GameBoardSerializer()
+    records = GameRecordSerializer(many=True)
+
+    class Meta:
+        model = GameModel
+        fields = ('id', 'title', 'created_date', 'players', 'board', 'records', 'is_game_end',)

@@ -15,13 +15,35 @@ class GameModel(models.Model):
     def __str__(self):
         return self.title
 
+    # getter : 指定プレイヤーを取得する
+    def get_player(self, i):
+        if i == 1:
+            return self.players.first()
+        elif i == 2:
+            return self.players.last()
+
     # getter : プレイヤー1を取得する
     def get_player1(self):
-        return self.players.first()
+        return self.get_player(1)
 
     # getter : プレイヤー2を取得する
     def get_player2(self):
-        return self.players.last()
+        return self.get_player(2)
+
+    # getter : 指定プレイヤーの得点を取得する
+    def get_players_points(self, i):
+        if i == 1:
+            return self.board.get_num_of_piece('1')
+        elif i == 2:
+            return self.board.get_num_of_piece('2')
+
+    # getter : プレイヤー1の得点を取得する
+    def get_player1_points(self):
+        return self.board.get_num_of_piece('1')
+
+    # getter : プレイヤー2の得点を取得する
+    def get_player2_points(self):
+        return self.board.get_num_of_piece('2')
 
     # getter : アクティブプレイヤーを取得する
     def get_active_player(self):
@@ -34,6 +56,10 @@ class GameModel(models.Model):
     # getter : 勝利プレイヤーを取得する
     def get_winner_player(self):
         return self.players.filter(is_winner=True)
+
+    # getter : アクション履歴の数を取得する
+    def get_num_of_records(self):
+        return self.records.count()
 
 
 # プレイヤー情報
@@ -55,12 +81,12 @@ class GamePlayer(models.Model):
         return self.name
 
 
-# 盤面情報
+# 盤面状況
 class GameBoard(models.Model):
     # 固定値
-    DEF_BLANK  = 0
-    DEF_COLOR1 = 1
-    DEF_COLOR2 = 2
+    DEF_BLANK  = '0'
+    DEF_COLOR1 = '1'
+    DEF_COLOR2 = '2'
     # リレーション
     game = models.OneToOneField('app_reversi.GameModel', on_delete=models.CASCADE, related_name='board')
     # フィールド
@@ -73,11 +99,11 @@ class GameBoard(models.Model):
 
     # init : 盤面の初期化
     def init_board_state(self):
-        self.state = DEF_BLANK*(BOARD_SIZE*BOARD_SIZE)
-        self.set_piece_at_pos(self, (self.size//2,  self.size//2  ), DEF_COLOR2)
-        self.set_piece_at_pos(self, (self.size//2,  self.size//2-1), DEF_COLOR1)
-        self.set_piece_at_pos(self, (self.size//2-1,self.size//2  ), DEF_COLOR1)
-        self.set_piece_at_pos(self, (self.size//2-1,self.size//2-1), DEF_COLOR2)
+        self.state = self.DEF_BLANK*(self.BOARD_SIZE**2)
+        self.set_piece_at_pos(self, (self.size//2,  self.size//2  ), self.DEF_COLOR2)
+        self.set_piece_at_pos(self, (self.size//2,  self.size//2-1), self.DEF_COLOR1)
+        self.set_piece_at_pos(self, (self.size//2-1,self.size//2  ), self.DEF_COLOR1)
+        self.set_piece_at_pos(self, (self.size//2-1,self.size//2-1), self.DEF_COLOR2)
 
     # getter : 指定座標の石を取得する
     def get_piece_at_pos(self, pos):
@@ -89,20 +115,21 @@ class GameBoard(models.Model):
     def set_piece_at_pos(self, pos, color):
         pos_x = pos[0]
         pos_y = pos[1]
-        if (color==DEF_COLOR1)or(color==DEF_COLOR2):
-            self.state[pos_y*self.size + pos_x] = color
+        if (color==self.DEF_COLOR1)or(color==self.DEF_COLOR2):
+            pos_idx = pos_y*self.size + pos_x
+            state_str = self.state
+            self.state = state_str[:pos_idx] + color + state_str[pos_idx+1:]
 
     # getter : 指定色の石数を取得する
     def get_num_of_piece(self, color):
-        if (color==DEF_BLANK)or(color==DEF_COLOR1)or(color==DEF_COLOR2):
+        if (color==self.DEF_BLANK)or(color==self.DEF_COLOR1)or(color==self.DEF_COLOR2):
             return self.state.count(color)
 
-
-# 棋譜情報
+# アクション履歴(棋譜)
 class GameRecord(models.Model):
     # リレーション
     game   = models.ForeignKey('app_reversi.GameModel', on_delete=models.CASCADE, related_name='records')
-    player = models.OneToOneField('app_reversi.GamePlayer', on_delete=models.CASCADE, related_name='records')
+    player = models.ForeignKey('app_reversi.GamePlayer', on_delete=models.CASCADE, related_name='records')
     # フィールド
     number = models.PositiveSmallIntegerField(validators=[MinValueValidator(0)])
     action = models.CharField(max_length=64)
@@ -111,4 +138,6 @@ class GameRecord(models.Model):
 
     # レコード名
     def __str__(self):
-        return self.state
+        return "{}: {}_{}".format(self.pk, str(self.number), self.action)
+
+    #

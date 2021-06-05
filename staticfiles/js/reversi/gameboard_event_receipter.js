@@ -2,22 +2,23 @@
 (function (global) { // globalオブジェクトを取得
     "use strict"; // strictモード
     // Class ------------------------------------------------
-    function Game() {}
+    function EventReceipter() {}
 
     // Header -----------------------------------------------
-    global.Game = Game;
-    global.Game.initGame = initGame;
+    global.EventReceipter = EventReceipter;
+    global.EventReceipter.init = init;
 
     // Const ------------------------------------------------
-    var COL = 8;
+    var BOARD_SIZE;
+    var RECT_CANV;
+    var CELL_SIZE;
 
     // Variable ---------------------------------------------
     var ctx;
-    var evented = false;
     var state = {}
     var point = {
-        x: 0,
-        y: 0
+        x: -1,
+        y: -1
     }
     var init_state = {
       map: ["0", "0", "0", "0", "0", "0", "0", "0",
@@ -29,8 +30,6 @@
             "0", "0", "0", "0", "0", "0", "0", "0",
             "0", "0", "0", "0", "0", "0", "0", "0",
            ],
-        mode: 0,
-        turn: 1,
         revision: 0,
         selected: {
             name: "",
@@ -39,15 +38,14 @@
     };
 
     // Function ---------------------------------------------
-    // ゲームの初期化
-    function initGame(_ctx) {
+    // 初期化
+    function init(board_size, rect_board, _ctx) {
+        BOARD_SIZE = board_size;
+        RECT_CANV  = rect_board;
+        CELL_SIZE  = RECT_CANV.w / BOARD_SIZE | 0;
         ctx = _ctx;
         state = objCopy(init_state);
-        if (!evented) {
-            evented = true;
-            setEvents();
-        }
-
+        setEvents();
         Render.render(ctx, state, point);
     }
 
@@ -78,13 +76,11 @@
     function ev_mouseClick(e) {
         var selected = hitTest(point.x, point.y);
         var number;
-        update_state()
-        console.log(global.document)
+        //state.map = ApiController.get_gameboard_state()
+        console.log(state.map); //非同期なので上手くいかない！
 
-        if (selected.name === "RECT_BOARD") {
+        if (selected.name === "RECT_CANV") {
             number = selected.value;
-            update_state()
-            //console.log(state.map)
             Render.render(ctx, state, point);
             /*
             if (Ai.canPut(state.map, selected.value, state.turn) === true) {
@@ -123,7 +119,7 @@
 
     // マウスカーソルの座標を取得する
     function hitTest(x, y) {
-        var objects = [Render.RECT_BOARD];
+        var objects = [RECT_CANV];
         var click_obj = null;
         var selected = {
             name: "",
@@ -131,14 +127,14 @@
         }
         for (var i = 0; i < objects.length; i++) {
             if (objects[i].w >= x && objects[i].x <= x && objects[i].h >= y && objects[i].y <= y) {
-                selected.name = "RECT_BOARD";
+                selected.name = "RECT_CANV";
                 break;
             }
         }
         switch (true) {
-        case selected.name === "RECT_BOARD":
-            selected.name = "RECT_BOARD";
-            selected.value = Math.floor(y / Render.CELL_SIZE) * COL + Math.floor(x / Render.CELL_SIZE)
+        case selected.name === "RECT_CANV":
+            selected.name = "RECT_CANV";
+            selected.value = Math.floor(y / Render.CELL_SIZE) * BOARD_SIZE + Math.floor(x / Render.CELL_SIZE)
             break;
         }
         return selected;
@@ -148,21 +144,5 @@
     function objCopy(obj) {
         return JSON.parse(JSON.stringify(obj));
     }
-
-    // ajaxによるAPIアクセス
-    function update_state(){
-        const player_apiurl = "http://127.0.0.1:8000/reversi/api/board/?game=1";
-        $.ajax({
-            url: player_apiurl,
-            method: "GET",
-            data: {"status":0},　// ユーザーのステータス情報を変更しないように
-            success: function(data){
-                //console.log(data[0])
-                state.map = objCopy(data[0]).state.split('');
-            }, error: function(error){
-                console.log(error)
-            }
-        })
-    };
 
 })((this || 0).self || global);
