@@ -34,13 +34,12 @@
     } else {
       isTouch = false;
     }
-    
+
     if (isTouch) {
       canv_ctx.canvas.addEventListener('touchstart', ev_mouseClick)
     } else {
       canv_ctx.canvas.addEventListener('mousemove', ev_mouseMove)
       canv_ctx.canvas.addEventListener('mouseup', ev_mouseClick)
-      canv_ctx.canvas.addEventListener('touchstart', ev_mouseClick) //スマホが反応しないので無理やり
     }
   }
 

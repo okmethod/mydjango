@@ -21,7 +21,8 @@ class GameModelViewSet(viewsets.ModelViewSet):
     queryset = GameModel.objects.all()
     serializer_class = GameModelSerializer
     filter_fields = ()
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    #permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (permissions.AllowAny,)
 
     # 新しいゲームを開始する
     @action(methods=['PATCH'], detail=True)
