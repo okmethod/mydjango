@@ -71,9 +71,9 @@
         // 情報取得を求められている場合
         if (please_api_get) {
             // APIにてゲームの公開情報を取得
-            ApiController.getGameState().then(result => {
-                console.log(result);
-                state    = result.board.state;
+            ApiController.sendApiRequest("GET", "").then(response => {
+                console.log(response);
+                state    = response.board.state;
                 // 石キャッシュを更新
                 canv_cache.canv_pieaces = updateCachePieces(state);
                 // 画面描画

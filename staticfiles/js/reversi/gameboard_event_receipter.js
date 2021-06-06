@@ -19,7 +19,7 @@
     // Function ---------------------------------------------
     // 初期化
     function init(_canv_ctx, board_size, rect_board) {
-        canv_ctx = _canv_ctx;
+        canv_ctx   = _canv_ctx;
         BOARD_SIZE = board_size;
         RECT_CANV  = rect_board;
         CELL_SIZE  = RECT_CANV.w / BOARD_SIZE | 0;
@@ -57,8 +57,10 @@
 
         if (selected.name === "RECT_CANV") {
             // APIにて石設置アクションの実行要求
-            ApiController.postGameRecord(1, "set_piece_at_pos", selected.pos).then(result => {
-                console.log(result);
+            const data = {"player_id":1, "action":"action_set_peace",
+                          "pos_x":selected.pos.x, "pos_y":selected.pos.y,}
+            ApiController.sendApiRequest("PATCH", "try_player_action/", data).then(response => {
+                console.log(response);
                 // 画面描画
                 Render.render(true, selected);
             })

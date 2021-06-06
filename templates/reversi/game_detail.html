@@ -6,6 +6,7 @@
     <p>プレイヤー1：{{ game.get_player1.name }} </p>
     <p>プレイヤー2：{{ game.get_player2.name }} </p>
     <canvas id="canv" width="500px" height="500px"></canvas>
+    <div id="msg_div">Messages will be displayed here.</div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script type="text/javascript" src="{% static 'js/reversi/api_controller.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/reversi/gameboard_render.js' %}"></script>
@@ -14,6 +15,7 @@
         // JavaScriptの初期設定
         const canv       = document.getElementById("canv")
         const canv_ctx   = canv.getContext('2d');
+        const msg_div    = document.getElementById("msg_div")
         const host_name  = "{{ request.get_host }}";
         const game_pk    = {{ game.pk }};
         const borad_size = {{ game.board.size }};
@@ -26,40 +28,47 @@
         const p1_color   = [p1_color_r, p1_color_g, p1_color_b]
         const p2_color   = [p2_color_r, p2_color_g, p2_color_b]
         const rect_board = {x:0, y:0, w:canv.width, h:canv.height};
-        ApiController.init(host_name, game_pk);
+        ApiController.init(msg_div, host_name, game_pk);
         Render.init(canv_ctx, borad_size, rect_board, p1_color, p2_color);
-        EventReceipter.init(canv_ctx, borad_size, rect_board);
+        EventReceipter.init(canv_ctx, borad_size, rect_board, msg_div);
     </script>
 
     <hr>
 
-    <!-- APIアクセスのサンプル -->
-    <button id="get_btn" type="button">Get GameBoard</button>
-    <div id="get_test_div"></div>
+    <!-- 画面更新ボタン -->
+    <button id="update_btn" type="button">Update GameBoard</button>
     <script>
-        const get_test_div = document.getElementById("get_test_div");
-        document.getElementById("get_btn").addEventListener("click", () => {
-            ApiController.getGameState().then(result => {
-                console.log(result);
-                const gameboard_state = result.board.state;
-                get_test_div.textContent = gameboard_state;
+        const boardstate_div = document.getElementById("boardstate_div");
+        document.getElementById("update_btn").addEventListener("click", () => {
+            ApiController.sendApiRequest("GET", "").then(response => {
+                console.log(response);
                 Render.render(true);
             })
         });
-
     </script>
-
     <hr>
-
+    <!-- パスボタン -->
+    <button id="pass_btn" type="button">Pass</button>
+    <script>
+        document.getElementById("pass_btn").addEventListener("click", () => {
+            const data = {"player_id":1, "action":"action_pass",}
+            ApiController.sendApiRequest("PATCH", "try_player_action/", data).then(response => {
+                console.log(response);
+                Render.render(true);
+            })
+        });
+    </script>
+    <hr>
+    <!-- 再戦ボタン -->
     <button id="restart_btn" type="button">Restart Game</button>
     <script>
         document.getElementById("restart_btn").addEventListener("click", () => {
-            ApiController.restartGame().then(result => {
-                console.log(result);
+            ApiController.sendApiRequest("PATCH", "restart_game/").then(response => {
+                console.log(response);
                 Render.render(true);
             })
         });
-
     </script>
+    <hr>
 
 {% endblock %}
