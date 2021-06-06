@@ -98,12 +98,12 @@ class GameBoard(models.Model):
         return self.state
 
     # init : 盤面の初期化
-    def init_board_state(self):
-        self.state = self.DEF_BLANK*(self.BOARD_SIZE**2)
-        self.set_piece_at_pos(self, (self.size//2,  self.size//2  ), self.DEF_COLOR2)
-        self.set_piece_at_pos(self, (self.size//2,  self.size//2-1), self.DEF_COLOR1)
-        self.set_piece_at_pos(self, (self.size//2-1,self.size//2  ), self.DEF_COLOR1)
-        self.set_piece_at_pos(self, (self.size//2-1,self.size//2-1), self.DEF_COLOR2)
+    def init_state(self):
+        self.state = self.DEF_BLANK*(self.size**2)
+        self.set_piece_at_pos((self.size//2,  self.size//2  ), self.DEF_COLOR2)
+        self.set_piece_at_pos((self.size//2,  self.size//2-1), self.DEF_COLOR1)
+        self.set_piece_at_pos((self.size//2-1,self.size//2  ), self.DEF_COLOR1)
+        self.set_piece_at_pos((self.size//2-1,self.size//2-1), self.DEF_COLOR2)
 
     # getter : 指定座標の石を取得する
     def get_piece_at_pos(self, pos):

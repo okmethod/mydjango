@@ -16,11 +16,25 @@ def game(request, pk):
     game = get_object_or_404(GameModel, pk=pk)
     return render(request, 'reversi/game_detail.html', {'game': game})
 
-# ゲームの公開情報をまとめて取得する
+# ゲーム全体
 class GameModelViewSet(viewsets.ModelViewSet):
     queryset = GameModel.objects.all()
     serializer_class = GameModelSerializer
     filter_fields = ()
+
+    # ゲーム状態を初期化する
+    @action(methods=['PATCH'], detail=True)
+    def restart_game(self, request, pk=None):
+        game   = GameModel.objects.get(id=pk)
+
+        # ボードの初期化
+        game.board.init_state()
+        game.board.save()
+
+        result = { 'valid':True }
+
+        return Response(status=status.HTTP_202_ACCEPTED, data=result)
+
 
 # プレイヤーアクションを登録する
 class GameRecordViewSet(viewsets.ModelViewSet):
@@ -30,7 +44,7 @@ class GameRecordViewSet(viewsets.ModelViewSet):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     # アクション：石を置く
-    @action(methods=['post'], detail=False)
+    @action(methods=['POST'], detail=False)
     def try_player_action(self, request):
         game   = GameModel.objects.get(id=request.data['game'])
         player = GamePlayer.objects.get(id=request.data['player'])

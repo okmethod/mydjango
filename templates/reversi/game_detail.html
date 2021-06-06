@@ -12,8 +12,8 @@
     <script type="text/javascript" src="{% static 'js/reversi/gameboard_event_receipter.js' %}"></script>
     <script>
         // JavaScriptの初期設定
-        const canv = document.getElementById("canv")
-        var   ctx  = canv.getContext('2d');
+        const canv       = document.getElementById("canv")
+        const canv_ctx   = canv.getContext('2d');
         const host_name  = "{{ request.get_host }}";
         const game_pk    = {{ game.pk }};
         const borad_size = {{ game.board.size }};
@@ -27,8 +27,8 @@
         const p2_color   = [p2_color_r, p2_color_g, p2_color_b]
         const rect_board = {x:0, y:0, w:canv.width, h:canv.height};
         ApiController.init(host_name, game_pk);
-        Render.init(borad_size, rect_board, p1_color, p2_color);
-        EventReceipter.init(borad_size, rect_board, ctx);
+        Render.init(canv_ctx, borad_size, rect_board, p1_color, p2_color);
+        EventReceipter.init(canv_ctx, borad_size, rect_board);
     </script>
 
     <hr>
@@ -37,24 +37,13 @@
     <button id="get_btn" type="button">Get GameBoard</button>
     <div id="get_test_div"></div>
     <script>
-        const n = {{ game.get_num_of_records }};
         const get_test_div = document.getElementById("get_test_div");
         document.getElementById("get_btn").addEventListener("click", () => {
             ApiController.getGameState().then(result => {
                 console.log(result);
-                const gameboard_state = result.board.state
-                const num_of_records  = result.records.length
-                const state = {
-                  map: gameboard_state.split(''),
-                  revision: num_of_records,
-                    selected: {
-                        name: "",
-                        value: 0
-                    }
-                };
-                const point = {x:0,y:0}
-                Render.render(ctx, state, point);
+                const gameboard_state = result.board.state;
                 get_test_div.textContent = gameboard_state;
+                Render.render(true);
             })
         });
 
@@ -62,18 +51,15 @@
 
     <hr>
 
-    <button id="post_btn" type="button">Post GameRecord</button>
-    <div id="post_test_div"></div>
+    <button id="restart_btn" type="button">Restart Game</button>
     <script>
-        const post_test_div = document.getElementById("post_test_div");
-        document.getElementById("post_btn").addEventListener("click", () => {
-            ApiController.postGameRecord(1, "set_piece_at_pos", [7,7]).then(result => {
+        document.getElementById("restart_btn").addEventListener("click", () => {
+            ApiController.restartGame().then(result => {
                 console.log(result);
-                post_test_div.textContent = result;
+                Render.render(true);
             })
         });
 
     </script>
-    <hr>
 
 {% endblock %}

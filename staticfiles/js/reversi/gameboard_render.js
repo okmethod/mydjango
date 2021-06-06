@@ -21,56 +21,81 @@
     const COLOR_SELECT = "#FFFFFF";
 
     // Variable ---------------------------------------------
-    var state_cache = null;
-    var prev_revision = -1;
+    var canv_ctx;
+    var state;
+
     var canv_cache = {      // ゲーム画面全体のキャッシュ
-        canv_board: null,   // 盤
+        canv_board: null,   // ボード
         canv_pieaces: null, // 石
-        canv_effect: null   // エフェクト
+        canv_highlight: null   // 指定マスのハイライト
     };
 
     // Function ---------------------------------------------
     // 初期化
-    function init(board_size, rect_board, p1_color, p2_color) {
+    function init(_canv_ctx, board_size, rect_board, p1_color, p2_color) {
+        canv_ctx   = _canv_ctx;
         BOARD_SIZE = board_size;
         RECT_CANV  = rect_board;
         CELL_SIZE  = RECT_CANV.w / BOARD_SIZE | 0;
         COLOR_PLAYER1 = rgb2hex(p1_color);
         COLOR_PLAYER2 = rgb2hex(p2_color);
+
+        // ボードキャッシュの原型を作成
+        canv_cache.canv_board = document.createElement("canvas");
+        canv_cache.canv_board.width  = RECT_CANV.w;
+        canv_cache.canv_board.height = RECT_CANV.h;
+        // ボードキャッシュは初めに1回だけ作成する
+        canv_cache.canv_board = updateCacheBoard()
+
+        // 石キャッシュの原型を生成
+        canv_cache.canv_pieaces = document.createElement("canvas");
+        canv_cache.canv_pieaces.width = RECT_CANV.w;
+        canv_cache.canv_pieaces.height = RECT_CANV.h;
+
+        // ハイライトキャッシュの原型を生成
+        canv_cache.canv_highlight = document.createElement("canvas");
+        canv_cache.canv_highlight.width = RECT_CANV.w;
+        canv_cache.canv_highlight.height = RECT_CANV.h;
+
+        // 画面描画
+        render(true);
+    }
+
+    // 画面更新
+    function render(please_api_get, selected=null) {
+        // セル位置が指定されている場合
+        if (selected != null) {
+            // ハイライトキャッシュを更新
+            canv_cache.canv_highlight = updateCacheHighlight(selected);
+        }
+        // 情報取得を求められている場合
+        if (please_api_get) {
+            // APIにてゲームの公開情報を取得
+            ApiController.getGameState().then(result => {
+                console.log(result);
+                state    = result.board.state;
+                // 石キャッシュを更新
+                canv_cache.canv_pieaces = updateCachePieces(state);
+                // 画面描画
+                drawAll(selected);
+              })
+        } else {
+            // 画面描画
+            drawAll(selected);
+        }
     }
 
     // ゲーム画面全体を描画する
-    function render(ctx, state, point) {
-        // 描画対象物を生成してキャッシュに保持
-        if (prev_revision < 0) { // 初期状態の場合、すべて描画
-            canv_cache.canv_board = drawBoard(state);
-            canv_cache.canv_pieaces = drawPieceALL(state);
-            canv_cache.canv_effect = drawEffect(state);
-            Render.CELL_SIZE = CELL_SIZE;
-        } else { // 初期状態でない場合、必要箇所のみ描画
-            if (state.revision != prev_revision) { // 盤面が変化している場合のみ
-                canv_cache.canv_pieaces = drawPieceALL(state);
-            }
-            canv_cache.canv_pieaces = drawPieceALL(state);
-            canv_cache.canv_effect = drawEffect(state, point);
-        }
-
+    function drawAll() {
         // キャッシュから描画
-        ctx.clearRect(0, 0, RECT_CANV.w, RECT_CANV.h);
-        ctx.drawImage(canv_cache.canv_board, 0, 0, RECT_CANV.w, RECT_CANV.h);
-        ctx.drawImage(canv_cache.canv_pieaces, 0, 0, RECT_CANV.w, RECT_CANV.h);
-        ctx.drawImage(canv_cache.canv_effect, 0, 0, RECT_CANV.w, RECT_CANV.h);
-        prev_revision = state.revision;
+        canv_ctx.clearRect(0, 0, RECT_CANV.w, RECT_CANV.h);
+        canv_ctx.drawImage(canv_cache.canv_board,     0, 0, RECT_CANV.w, RECT_CANV.h);
+        canv_ctx.drawImage(canv_cache.canv_pieaces,   0, 0, RECT_CANV.w, RECT_CANV.h);
+        canv_ctx.drawImage(canv_cache.canv_highlight, 0, 0, RECT_CANV.w, RECT_CANV.h);
     }
 
-    // 盤を描画する
-    function drawBoard(state) {
-        // 盤のキャッシュの原型を生成
-        if (!canv_cache.canv_board) {
-            canv_cache.canv_board = document.createElement("canvas");
-            canv_cache.canv_board.width = RECT_CANV.w;
-            canv_cache.canv_board.height = RECT_CANV.h;
-        }
+    // ボードキャッシュを更新する
+    function updateCacheBoard() {
 
         // 2Dグラフィックスのコンテキストオブジェクトを取得
         var ctx = canv_cache.canv_board.getContext('2d');
@@ -89,29 +114,25 @@
             }
         }
 
-        // 盤キャッシュを返却
+        // ボードキャッシュを返却
         return canv_cache.canv_board;
     }
 
-    // 石をすべて描画する
-    function drawPieceALL(state) {
-        // 石キャッシュの原型を生成
-        if (!canv_cache.canv_pieaces) {
-            canv_cache.canv_pieaces = document.createElement("canvas");
-            canv_cache.canv_pieaces.width = RECT_CANV.w;
-            canv_cache.canv_pieaces.height = RECT_CANV.h;
-        }
+    // 石キャッシュを更新する
+    function updateCachePieces(state=null) {
 
         // 2Dグラフィックスのコンテキストオブジェクトを取得
         var ctx = canv_cache.canv_pieaces.getContext('2d');
         ctx.clearRect(0, 0, RECT_CANV.w, RECT_CANV.h);
 
         // すべてのマスをループ
+        var cell_state;
         for (var x = 0; x < BOARD_SIZE; x++) {
             for (var y = 0; y < BOARD_SIZE; y++) {
-                if (state.map[y * BOARD_SIZE + x] != "0") {
-                    // 石を1つを描画
-                    drawPiece(ctx, x * CELL_SIZE, y * CELL_SIZE, state.map[y * BOARD_SIZE + x]);
+                cell_state = state.substr(y*BOARD_SIZE + x, 1);
+                if (cell_state  != "0") {
+                    // 石1つを追加
+                    addPiece(ctx, x*CELL_SIZE, y*CELL_SIZE, cell_state);
                 }
             }
         }
@@ -121,12 +142,12 @@
     }
 
     // 石を1つ描画する
-    function drawPiece(ctx, x, y, number) {
+    function addPiece(ctx, x, y, player_idx) {
 
         // 石色の設定
-        if (number == "1") { // 黒石の設定
+        if (player_idx == "1") { // 黒石の設定
             ctx.fillStyle = COLOR_PLAYER1;
-        } else if (number == "2") { // 白石の設定
+        } else if (player_idx == "2") { // 白石の設定
             ctx.fillStyle = COLOR_PLAYER2;
         }
 
@@ -145,36 +166,28 @@
         return ctx;
     }
 
-    // エフェクトを描画する
-    function drawEffect(state) {
+    // ハイライトキャッシュを更新する
+    function updateCacheHighlight(selected=null) {
 
-        // エフェクトキャッシュの原型を生成
-        if (!canv_cache.canv_effect) {
-            canv_cache.canv_effect = document.createElement("canvas");
-            canv_cache.canv_effect.width = RECT_CANV.w;
-            canv_cache.canv_effect.height = RECT_CANV.h;
+        // ボード内が指定されている場合のみ
+        if (selected.name = "RECT_CANV") {
+            // 2Dグラフィックスのコンテキストオブジェクトを取得
+            var ctx = canv_cache.canv_highlight.getContext('2d');
+            ctx.clearRect(0, 0, RECT_CANV.w, RECT_CANV.h);
+
+            // 指定マスにハイライトを追加
+            ctx.fillStyle = COLOR_SELECT;
+            ctx.globalAlpha = 0.5;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.fillRect(selected.pos.x * CELL_SIZE, selected.pos.y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
         }
 
-        // 2Dグラフィックスのコンテキストオブジェクトを取得
-        var ctx = canv_cache.canv_effect.getContext('2d');
-        ctx.clearRect(0, 0, RECT_CANV.w, RECT_CANV.h);
-
-        // カーソル位置を取得
-        var x = (state.selected.value % BOARD_SIZE | 0);
-        var y = (state.selected.value / BOARD_SIZE | 0);
-
-        // カーソル
-        ctx.fillStyle = COLOR_SELECT;
-        ctx.globalAlpha = 0.5;
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-
-        // エフェクトキャッシュを返却
-        return canv_cache.canv_effect;
+        // ハイライトキャッシュを返却
+        return canv_cache.canv_highlight;
     }
 
-    // RGBをHEXに変換
+    // RGBをHEXに変換する
     function rgb2hex(rgb) {
 	     return "#" + rgb.map( function ( value ) {
 		       return ( "0" + value.toString( 16 ) ).slice( -2 ) ;

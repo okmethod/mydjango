@@ -20,12 +20,10 @@ class GameRecordSerializer(serializers.ModelSerializer):
         model = GameRecord
         fields = ('game', 'player', 'action', 'pos_x', 'pos_y',)
 
-# ゲームの公開情報をまとめて取得する
 class GameModelSerializer(serializers.ModelSerializer):
     players = GamePlayerSerializer(many=True)
     board   = GameBoardSerializer()
-    records = GameRecordSerializer(many=True)
 
     class Meta:
         model = GameModel
-        fields = ('id', 'title', 'created_date', 'players', 'board', 'records', 'is_game_end',)
+        fields = ('id', 'title', 'created_date', 'players', 'board', 'is_game_end',)
