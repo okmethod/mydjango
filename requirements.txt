@@ -1,3 +1,3 @@
 -r requirements_dev.txt
-gunicorn
-psycopg2
+gunicorn~=20.1.0
+psycopg2~=2.8.6

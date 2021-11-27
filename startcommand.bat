@@ -6,7 +6,7 @@ myvenv\Scripts\activate
 
 rem pipによるパッケージインストール
 python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
+python -m pip install -r requirements_dev.txt
 
 rem Webサービスの起動
 python manage.py runserver
