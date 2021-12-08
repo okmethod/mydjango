@@ -1,19 +1,34 @@
 # mydjango
 
+---
 ## やること
 Djangoを使用して、pythonでWebサービスを実装する。
-（→URLは[こちら](http://okmethod.pythonanywhere.com/ "http://okmethod.pythonanywhere.com/")）
 
+
+---
 ## 目的
+- AWSインフラ構築の練習をする。
+- Webサービス構築に必要なMWに触れる。
 - Webサービス実装の練習をする。
 - MVC(Model/View/Controller)と対比させつつ、MTV(Model, Template, View)に基づいた設計の練習をする。
 
+
+---
+## アーキテクチャ
+
+![代替テキスト](.\staticfiles\image\architecture.drawio.png "画像タイトル")
+
+
+---
 ## ディレクトリ構成
     .
     ├── README.md
     ├── manage.py
     ├── requirements.txt
     ├── db.sqlite3
+    │
+    ├── etc
+    │   └── *
     │
     ├── config
     │   ├── __init__.py
@@ -34,6 +49,8 @@ Djangoを使用して、pythonでWebサービスを実装する。
     ├── staticfiles
     │   ├── css
     │   │   └── *.css
+    │   ├── js
+    │   │   └── *.js
     │   └── image
     │       └── *
     │      
