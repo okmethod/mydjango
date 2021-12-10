@@ -1,8 +1,5 @@
 #!/bin/bash
 
-#当該EC2インスタンスの動的パブリックIPの取得
-public_ip=$(curl inet-ip.info)
-
 # ubuntuレイヤのインストール
 sudo apt-get update
 sudo apt-get -y install python3-pip python3-dev libmysqlclient-dev mysql-server mysql-client nginx
@@ -28,33 +25,46 @@ sudo apt-get -y install python3-pip python3-dev libmysqlclient-dev mysql-server 
 #GRANT ALL PRIVILEGES ON DATABASE djangodb TO django;
 #\q
 
+# gitリポジトリのクローン
+git clone https://github.com/okmethod/mydjango.git
+cd mydjango
+
 # pythonレイヤのインストール
 sudo -H pip3 install --upgrade pip
 sudo -H pip3 install awscli --upgrade
-git clone https://github.com/okmethod/mydjango.git
-cd mydjango
 pip3 install -r requirements.txt
+
+# ↑ここまで実行した状態でAMIを取得
+# ↓ここからは起動の度に実行
+
+# 一時PATHの追加
 export PATH="$PATH:/home/ubuntu/.local/bin"
+export PYTHONPATH="$PYTHONPATH:/home/ubuntu/.local/lib/python3.8/site-packages"
 
-
-# S3から設定ファイルを取得、EC2インスタンス依存項目の置換
-aws s3 cp s3://private-files-for-mydjango/mydjango/.env ./
-sed -i -e 's/dj-database-url/mysql\:\/\/djangouser\:mysqldjangouserpw\@dev-mydjango-mysqldb.cxlbsemgocwo.ap-northeast-1.rds.amazonaws.com\:\/djangodb/' ./.env
-#sed -i -e 's/dj-database-url/postgres\:\/\/django\:psqlmyDjango\@localhost\:\/djangodb\/' ./.env
-sed -i s/www.mydjangp.jp/$public_ip/ ./.env
-sudo aws s3 cp s3://private-files-for-mydjango/etc/systemd/system/gunicorn.service /etc/systemd/system/
-sudo aws s3 cp s3://private-files-for-mydjango/etc/systemd/system/gunicorn.socket /etc/systemd/system/
-sudo aws s3 cp s3://private-files-for-mydjango/etc/nginx/sites-available/mydjango /etc/nginx/sites-available/
-sudo sed -i s/www.mydjangp.jp/$public_ip/ /etc/nginx/sites-available/mydjango
+# 設定ファイルの取得、動的パブリックIPの取得、設定ファイルの置換
+public_ip=$(curl inet-ip.info)
+cd /home/ubuntu/mydjango/
+git pull
+aws s3 cp s3://private-files-for-mydjango/mydjango/.env /home/ubuntu/mydjango/
+sed -i -e 's/replacement-dj-database-url/mysql\:\/\/djangouser\:mysqldjangouserpw\@dev-mydjango-mysqldb.cxlbsemgocwo.ap-northeast-1.rds.amazonaws.com\:\/djangodb/' /home/ubuntu/mydjango/.env
+#sed -i -e 's/dj-database-url/postgres\:\/\/django\:psqlmyDjango\@localhost\:\/djangodb\/' /home/ubuntu/mydjango/.env
+sed -i s/replacement-allowed-hosts/localhost\,$public_ip/ /home/ubuntu/mydjango/.env
+sudo cp -f -r /home/ubuntu/mydjango/etc/systemd/system/ /etc/systemd/
+sudo cp -f -r /home/ubuntu/mydjango/etc/nginx/sites-available/ /etc/nginx/
+sudo sed -i s/replacement-server-name/$public_ip/ /etc/nginx/sites-available/mydjango
+sudo rm /etc/nginx/sites-enabled/mydjango
 sudo ln -s /etc/nginx/sites-available/mydjango /etc/nginx/sites-enabled/
 
 # DBマイグレート
-python3 manage.py makemigrations
-python3 manage.py migrate
+#python3 manage.py makemigrations
+#python3 manage.py migrate
 #python3 manage.py runserver 0.0.0.0:8000
 
+# Djangoスーパーユーザ作成
+#python3 manage.py createsuperuser
+
 # staticファイルの収集
-python3 manage.py collectstatic
+python3 manage.py collectstatic --noinput
 
 # WSGIサーバ起動
 sudo systemctl start gunicorn.socket
@@ -64,3 +74,14 @@ curl --unix-socket /home/ubuntu/mydjango/config/config.sock localhost
 # WEBサーバ起動
 sudo systemctl start nginx
 sudo systemctl restart nginx
+
+# ステータス確認
+#sudo systemctl status gunicorn
+#sudo nginx -t
+
+# サーバ再起動
+#pkill gunicorn
+#sudo systemctl daemon-reload
+#sudo systemctl start gunicorn.socket
+#curl --unix-socket /home/ubuntu/mydjango/config/config.sock localhost
+#sudo systemctl restart nginx

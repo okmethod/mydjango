@@ -1,6 +1,6 @@
 server {
         listen 80;
-        server_name www.mydjangp.jp;
+        server_name replacement-server-name;
 
         location = /favicon.ico {access_log off; log_not_found off;}
         location /static/ {
