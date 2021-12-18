@@ -1,6 +1,6 @@
 server {
         listen 80;
-        server_name replacement-server-name;
+        server_name replacement_server_name;
 
         location = /favicon.ico {access_log off; log_not_found off;}
         location /static/ {
