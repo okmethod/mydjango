@@ -64,7 +64,7 @@ db_name=djangodb
 
 # 設定ファイルの取得および更新
 cd /home/ubuntu/mydjango/
-git pull
+sudo git pull
 aws s3 cp s3://private-files-for-mydjango/mydjango/.env /home/ubuntu/mydjango/
 sed -i s/replacement_db_engine/$db_engine/ /home/ubuntu/mydjango/.env
 sed -i s/replacement_db_user/$db_user/ /home/ubuntu/mydjango/.env
