@@ -16,8 +16,9 @@ Djangoを使用して、pythonでWebサービスを実装する。
 ---
 ## アーキテクチャ
 
-![代替テキスト](.\staticfiles\image\architecture.drawio.png "画像タイトル")
+![代替テキスト](https://github.com/okmethod/mydjango/blob/master/staticfiles/image/architecture.drawio.png "画像タイトル")
 
+[URL](http://dev-mydjango-web-alb-915478302.ap-northeast-1.elb.amazonaws.com)
 
 ---
 ## ディレクトリ構成
