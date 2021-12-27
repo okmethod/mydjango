@@ -18,7 +18,9 @@ Djangoを使用して、pythonでWebサービスを実装する。
 
 ![代替テキスト](https://github.com/okmethod/mydjango/blob/master/staticfiles/image/architecture.drawio.png "画像タイトル")
 
-[URL](http://dev-mydjango-web-alb-915478302.ap-northeast-1.elb.amazonaws.com) （標準サービス提供時間：9:00-17:00）
+~~[URL](http://dev-mydjango-web-alb-915478302.ap-northeast-1.elb.amazonaws.com) （標準サービス提供時間：9:00-17:00）~~
+
+ALBの料金が高いので一時削除中
 
 ---
 ## ディレクトリ構成
